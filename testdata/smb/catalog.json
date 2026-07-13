@@ -1,0 +1,8 @@
+{
+  "version": "1",
+  "apps": [
+    { "id": "report-system", "name": "報表系統", "version": "v1150712", "author": "IT Team", "description": "MVP 下載與更新測試應用", "executable": "ReportSystem.exe" },
+    { "id": "purchase-manager", "name": "採購管理系統", "version": "v1150712", "author": "IT Team", "description": "MVP 修復測試應用", "executable": "PurchaseManager.exe" },
+    { "id": "ops-toolkit", "name": "維運支援工具", "version": "v1150712", "author": "IT Support", "description": "MVP 離線啟動測試應用", "executable": "bin/OpsToolkit.exe" }
+  ]
+}

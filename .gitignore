@@ -1,0 +1,6 @@
+build/bin
+testdata/smb/**/*.exe
+node_modules
+frontend/dist
+docs/
+AGENTS.md

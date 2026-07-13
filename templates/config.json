@@ -1,0 +1,5 @@
+{
+  "smbBasePath": "\\\\server\\apps",
+  "smbUsername": "readonly-user",
+  "smbPassword": "password"
+}

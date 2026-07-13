@@ -1,0 +1,13 @@
+{
+  "version": "1",
+  "apps": [
+    {
+      "id": "sample-app",
+      "name": "範例應用",
+      "version": "v1150702",
+      "author": "IT Team",
+      "description": "範例 portable 應用",
+      "executable": "SampleApp.exe"
+    }
+  ]
+}
