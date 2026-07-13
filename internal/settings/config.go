@@ -18,6 +18,7 @@ var defaultConfig = Config{
 	SMBBasePath: `\\server\apps`,
 	SMBUsername: "readonly-user",
 	SMBPassword: "password",
+	SyncWorkers: DefaultSyncWorkers,
 }
 
 // Config contains the connection settings for the internal SMB source.
