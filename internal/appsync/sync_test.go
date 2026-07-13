@@ -17,7 +17,7 @@ func TestDirectoryContextRemovesStagingAfterCancellation(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if err := DirectoryContext(ctx, source, filepath.Join(local, app.ID), app, nil); err == nil {
+	if err := DirectoryContext(ctx, source, filepath.Join(local, app.ID), app, 4, nil); err == nil {
 		t.Fatal("expected cancellation error")
 	}
 	entries, err := os.ReadDir(local)
@@ -45,7 +45,7 @@ func TestDirectoryCopiesAndMirrorsApplication(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(destination, "obsolete"), []byte("old"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := Directory(source, destination, app, nil); err != nil {
+	if err := Directory(source, destination, app, 4, nil); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Join(destination, "obsolete")); !os.IsNotExist(err) {
@@ -66,7 +66,7 @@ func TestDirectoryKeepsExistingApplicationWhenExecutableIsMissing(t *testing.T) 
 		t.Fatal(err)
 	}
 	app := appcatalog.App{ID: "tool", Name: "Tool", Version: "v2", Author: "IT", Description: "Test", Executable: "missing.exe"}
-	if err := Directory(source, destination, app, nil); err == nil {
+	if err := Directory(source, destination, app, 4, nil); err == nil {
 		t.Fatal("expected error")
 	}
 	if _, err := os.Stat(filepath.Join(destination, "keep")); err != nil {
@@ -85,7 +85,7 @@ func TestDirectoryReportsCompletedFiles(t *testing.T) {
 	}
 
 	var progress []Progress
-	err := Directory(source, filepath.Join(local, app.ID), app, func(update Progress) {
+	err := Directory(source, filepath.Join(local, app.ID), app, 4, func(update Progress) {
 		progress = append(progress, update)
 	})
 	if err != nil {
@@ -93,5 +93,13 @@ func TestDirectoryReportsCompletedFiles(t *testing.T) {
 	}
 	if len(progress) != 2 || progress[len(progress)-1].CompletedFiles != 2 {
 		t.Fatalf("progress = %#v, want 2 completed files", progress)
+	}
+}
+
+func TestDirectoryRejectsInvalidWorkerCount(t *testing.T) {
+	source, local := t.TempDir(), t.TempDir()
+	app := appcatalog.App{ID: "tool", Executable: "tool.exe"}
+	if err := Directory(source, filepath.Join(local, app.ID), app, 0, nil); err == nil {
+		t.Fatal("expected invalid worker count error")
 	}
 }

@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -33,6 +34,40 @@ func TestLoad(t *testing.T) {
 	}
 	if got.SMBBasePath != `\\server\apps` || got.SMBUsername != "user" || got.SMBPassword != "secret" {
 		t.Fatalf("Load() = %#v", got)
+	}
+	if got.SyncWorkers != DefaultSyncWorkers {
+		t.Fatalf("SyncWorkers = %d, want default %d", got.SyncWorkers, DefaultSyncWorkers)
+	}
+}
+
+func TestLoadReadsSyncWorkers(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.json")
+	data := []byte(`{"smbBasePath":"\\\\server\\apps","smbUsername":"user","smbPassword":"secret","syncWorkers":8}`)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.SyncWorkers != 8 {
+		t.Fatalf("SyncWorkers = %d, want 8", got.SyncWorkers)
+	}
+}
+
+func TestLoadRejectsInvalidSyncWorkers(t *testing.T) {
+	for _, workers := range []int{0, MaximumSyncWorkers + 1} {
+		t.Run(fmt.Sprintf("workers-%d", workers), func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "config.json")
+			data := []byte(fmt.Sprintf(`{"syncWorkers":%d}`, workers))
+			if err := os.WriteFile(path, data, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := Load(path); err == nil {
+				t.Fatal("Load() error = nil, want invalid syncWorkers error")
+			}
+		})
 	}
 }
 
@@ -67,7 +102,7 @@ func TestLoadOrCreateCreatesDefaultConfig(t *testing.T) {
 
 func TestLoadOrCreatePreservesExistingConfig(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.json")
-	want := Config{SMBBasePath: `\\server\custom`, SMBUsername: "custom", SMBPassword: "secret"}
+	want := Config{SMBBasePath: `\\server\custom`, SMBUsername: "custom", SMBPassword: "secret", SyncWorkers: DefaultSyncWorkers}
 	data := []byte(`{"smbBasePath":"\\\\server\\custom","smbUsername":"custom","smbPassword":"secret"}`)
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatal(err)

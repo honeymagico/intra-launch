@@ -183,9 +183,9 @@ func (a *App) syncApplication(id string, checkRunning bool) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("同步應用 %s: %s -> %s", id, source, destination)
+	log.Printf("同步應用 %s（%d workers）: %s -> %s", id, config.SyncWorkers, source, destination)
 	lastProgress := time.Time{}
-	return appsync.DirectoryContext(syncContext, source, destination, app, func(progress appsync.Progress) {
+	return appsync.DirectoryContext(syncContext, source, destination, app, config.SyncWorkers, func(progress appsync.Progress) {
 		if a.ctx == nil || time.Since(lastProgress) < 250*time.Millisecond {
 			return
 		}

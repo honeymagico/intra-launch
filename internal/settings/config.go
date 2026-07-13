@@ -8,7 +8,11 @@ import (
 	"path/filepath"
 )
 
-const configFileName = "config.json"
+const (
+	configFileName     = "config.json"
+	DefaultSyncWorkers = 4
+	MaximumSyncWorkers = 8
+)
 
 var defaultConfig = Config{
 	SMBBasePath: `\\server\apps`,
@@ -21,6 +25,7 @@ type Config struct {
 	SMBBasePath string `json:"smbBasePath"`
 	SMBUsername string `json:"smbUsername"`
 	SMBPassword string `json:"smbPassword"`
+	SyncWorkers int    `json:"syncWorkers,omitempty"`
 }
 
 // DefaultPath returns the per-user settings file path.
@@ -39,9 +44,13 @@ func Load(path string) (Config, error) {
 		return Config{}, fmt.Errorf("讀取設定檔失敗 %q: %w", path, err)
 	}
 
-	var config Config
+	// Start from defaults so settings created by older versions remain valid.
+	config := defaultConfig
 	if err := json.Unmarshal(data, &config); err != nil {
 		return Config{}, fmt.Errorf("設定檔格式錯誤 %q: %w", path, err)
+	}
+	if config.SyncWorkers < 1 || config.SyncWorkers > MaximumSyncWorkers {
+		return Config{}, fmt.Errorf("設定檔格式錯誤 %q: syncWorkers 必須介於 1 到 %d", path, MaximumSyncWorkers)
 	}
 	return config, nil
 }

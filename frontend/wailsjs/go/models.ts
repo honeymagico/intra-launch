@@ -138,6 +138,7 @@ export namespace settings {
 	    smbBasePath: string;
 	    smbUsername: string;
 	    smbPassword: string;
+	    syncWorkers?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -148,6 +149,7 @@ export namespace settings {
 	        this.smbBasePath = source["smbBasePath"];
 	        this.smbUsername = source["smbUsername"];
 	        this.smbPassword = source["smbPassword"];
+	        this.syncWorkers = source["syncWorkers"];
 	    }
 	}
 
