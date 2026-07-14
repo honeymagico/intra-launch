@@ -17,7 +17,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:     "內部應用啟動器",
+		Title:     "內部應用啟動器 " + appVersion,
 		Width:     1280,
 		Height:    820,
 		MinWidth:  960,

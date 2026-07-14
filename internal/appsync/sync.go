@@ -57,16 +57,16 @@ func DirectoryContext(ctx context.Context, source, destination string, app appca
 	backup := destination + fmt.Sprintf(".backup-%d", time.Now().UnixNano())
 	hadDestination := false
 	if _, err := os.Stat(destination); err == nil {
-		if err := os.Rename(destination, backup); err != nil {
+		if err := renameWithRetry(ctx, destination, backup); err != nil {
 			return fmt.Errorf("準備替換舊版本失敗: %w", err)
 		}
 		hadDestination = true
 	} else if !os.IsNotExist(err) {
 		return fmt.Errorf("檢查本機應用目錄失敗: %w", err)
 	}
-	if err := os.Rename(staging, destination); err != nil {
+	if err := renameWithRetry(ctx, staging, destination); err != nil {
 		if hadDestination {
-			_ = os.Rename(backup, destination)
+			_ = renameWithRetry(context.Background(), backup, destination)
 		}
 		return fmt.Errorf("套用同步結果失敗: %w", err)
 	}
@@ -74,6 +74,31 @@ func DirectoryContext(ctx context.Context, source, destination string, app appca
 		_ = os.RemoveAll(backup)
 	}
 	return nil
+}
+
+func renameWithRetry(ctx context.Context, oldPath, newPath string) error {
+	const (
+		maxRetries = 5
+		retryDelay = 400 * time.Millisecond
+	)
+
+	var err error
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		if err = os.Rename(oldPath, newPath); err == nil {
+			return nil
+		}
+		if attempt == maxRetries {
+			break
+		}
+		timer := time.NewTimer(retryDelay)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ctx.Err()
+		case <-timer.C:
+		}
+	}
+	return err
 }
 
 type copyJob struct {

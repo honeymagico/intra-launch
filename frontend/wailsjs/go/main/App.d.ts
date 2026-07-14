@@ -4,6 +4,8 @@ import {appstate} from '../models';
 import {appcatalog} from '../models';
 import {settings} from '../models';
 
+export function AppVersion():Promise<string>;
+
 export function ApplicationLists():Promise<appstate.Lists>;
 
 export function CancelSync():Promise<boolean>;

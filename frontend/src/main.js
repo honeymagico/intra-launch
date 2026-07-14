@@ -1,6 +1,6 @@
 import './style.css';
 import {
-  ApplicationLists, CancelSync, DownloadApplication, Health, LastSync, LaunchApplication,
+  ApplicationLists, AppVersion, CancelSync, DownloadApplication, Health, LastSync, LaunchApplication,
   RepairApplication, UninstallApplication, UpdateApplication,
 } from '../wailsjs/go/main/App';
 import { BrowserOpenURL, EventsOn } from '../wailsjs/runtime/runtime';
@@ -99,6 +99,8 @@ document.querySelector('#app').innerHTML = `
         </div>
         <p>公司內網使用的 portable 應用下載、更新與啟動工具。</p>
         <dl>
+          <dt>版本</dt>
+          <dd id="about-version"></dd>
           <dt>GitHub</dt>
           <dd><button id="open-github" class="link-button" type="button">github.com/honeymagico/intra-launch</button></dd>
           <dt>授權</dt>
@@ -110,7 +112,10 @@ document.querySelector('#app').innerHTML = `
   </main>`;
 
 const aboutDialog = document.querySelector('#about-dialog');
-document.querySelector('#open-about').addEventListener('click', () => aboutDialog.showModal());
+document.querySelector('#open-about').addEventListener('click', async () => {
+  document.querySelector('#about-version').textContent = await AppVersion();
+  aboutDialog.showModal();
+});
 document.querySelector('#open-github').addEventListener('click', () => BrowserOpenURL('https://github.com/honeymagico/intra-launch'));
 aboutDialog.addEventListener('click', (event) => {
   if (event.target === aboutDialog) aboutDialog.close();

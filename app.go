@@ -69,6 +69,11 @@ func (a *App) Health() string {
 	return "ready"
 }
 
+// AppVersion returns the version displayed by the window and About dialog.
+func (a *App) AppVersion() string {
+	return appVersion
+}
+
 // LoadSettings reads the current user's SMB connection settings.
 func (a *App) LoadSettings() (settings.Config, error) {
 	path, err := settings.DefaultPath()
